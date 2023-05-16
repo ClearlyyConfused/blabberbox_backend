@@ -38,9 +38,17 @@ router.get('/getChat', function (req, res, next) {
 	getChat().then((item) => res.json(item));
 });
 
-async function findUser(userID) {
-	return await userSchema.findById(userID);
-}
+/* route to get a user */
+router.get('/getUser', function (req, res, next) {
+	async function getUser() {
+		return await userSchema.find({
+			username: req.body.username,
+			password: req.body.password,
+		});
+	}
+
+	getUser().then((item) => res.json(item));
+});
 
 /* route to message a chat */
 router.post('/messageChat', function (req, res, next) {
