@@ -30,7 +30,7 @@ router.post('/createChat', function (req, res, next) {
 });
 
 /* route to get a chat */
-router.get('/getChat', function (req, res, next) {
+router.post('/getChat', function (req, res, next) {
 	async function getChat() {
 		return await chatSchema.find({ name: req.body.name, password: req.body.password });
 	}
@@ -39,7 +39,7 @@ router.get('/getChat', function (req, res, next) {
 });
 
 /* route to get a user */
-router.get('/getUser', function (req, res, next) {
+router.post('/getUser', function (req, res, next) {
 	async function getUser() {
 		return await userSchema.find({
 			username: req.body.username,
