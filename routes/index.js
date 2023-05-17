@@ -29,8 +29,26 @@ router.post('/createChat', function (req, res, next) {
 		messages: [],
 	});
 
-	newChat.save();
-	res.json({ success: true });
+	async function getUser() {
+		return await userSchema.findById(req.body.user);
+	}
+
+	getUser().then((user) => {
+		const updatedUser = {
+			_id: user._id,
+			username: user.username,
+			password: user.password,
+			chats: [...user.chats, newChat._id],
+		};
+
+		async function updateUser() {
+			await userSchema.findByIdAndUpdate(req.body.user, updatedUser);
+		}
+
+		newChat.save();
+		updateUser();
+		res.json({ success: true });
+	});
 });
 
 /* route to get a chat */
