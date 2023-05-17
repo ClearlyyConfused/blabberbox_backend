@@ -51,6 +51,44 @@ router.post('/createChat', function (req, res, next) {
 	});
 });
 
+/* route to join a chat */
+router.post('/joinChat', function (req, res, next) {
+	async function getChat() {
+		return await chatSchema.findById(req.body.chatID);
+	}
+	async function getUser() {
+		return await userSchema.findById(req.body.userID);
+	}
+
+	getChat().then((chat) => {
+		getUser().then((user) => {
+			const updatedChat = {
+				_id: chat._id,
+				name: chat.name,
+				password: chat.password,
+				users: [...chat.users, req.body.userID],
+				messages: chat.messages,
+			};
+
+			const updatedUser = {
+				_id: user._id,
+				username: user.username,
+				password: user.password,
+				chats: [...user.chats, chat._id],
+			};
+
+			async function updateUser() {
+				await userSchema.findByIdAndUpdate(req.body.userID, updatedUser);
+			}
+			async function updateChat() {
+				await chatSchema.findByIdAndUpdate(chat._id, updatedChat);
+			}
+			updateChat();
+			updateUser();
+		});
+	});
+});
+
 /* route to get a chat */
 router.post('/getChat', function (req, res, next) {
 	async function getChat() {
