@@ -119,34 +119,19 @@ router.post('/messageChat', function (req, res, next) {
 	}
 
 	getChat().then((chat) => {
-		findUser(req.body.user).then((user) => {
-			const updatedChat = new chatSchema({
-				_id: chat._id,
-				users: chat.users.includes(req.body.user)
-					? [...chat.users]
-					: [...chat.users, req.body.user],
-				messages: [...chat.messages, { user: req.body.user, message: req.body.message }],
-			});
-
-			const updatedUser = new userSchema({
-				_id: user._id,
-				username: user.username,
-				password: user.password,
-				chats: user.chats.includes(chat._id)
-					? [...user.chats]
-					: [...user.chats, chat._id],
-			});
-
-			async function updateChat() {
-				await chatSchema.findByIdAndUpdate(req.body.chatID, updatedChat).exec();
-			}
-			async function updateUser() {
-				await userSchema.findByIdAndUpdate(user._id, updatedUser).exec();
-			}
-
-			updateChat();
-			updateUser();
+		const updatedChat = new chatSchema({
+			_id: chat._id,
+			users: chat.users.includes(req.body.userID)
+				? [...chat.users]
+				: [...chat.users, req.body.user],
+			messages: [...chat.messages, { user: req.body.userID, message: req.body.message }],
 		});
+
+		async function updateChat() {
+			await chatSchema.findByIdAndUpdate(req.body.chatID, updatedChat).exec();
+		}
+
+		updateChat();
 	});
 	res.json({ success: true });
 });
