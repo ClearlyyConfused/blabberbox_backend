@@ -24,6 +24,8 @@ router.post('/createChat', function (req, res, next) {
 	const newChat = new chatSchema({
 		name: req.body.name,
 		password: req.body.password,
+		users: [req.body.user],
+		messages: [],
 	});
 
 	newChat.save();
