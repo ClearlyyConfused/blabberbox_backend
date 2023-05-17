@@ -17,6 +17,7 @@ router.post('/createUser', function (req, res, next) {
 	});
 
 	newUser.save();
+	res.json({ success: true });
 });
 
 /* route to create a chat */
@@ -29,6 +30,7 @@ router.post('/createChat', function (req, res, next) {
 	});
 
 	newChat.save();
+	res.json({ success: true });
 });
 
 /* route to get a chat */
@@ -88,6 +90,7 @@ router.post('/messageChat', function (req, res, next) {
 			updateUser();
 		});
 	});
+	res.json({ success: true });
 });
 
 module.exports = router;
