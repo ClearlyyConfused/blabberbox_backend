@@ -54,10 +54,12 @@ router.post('/createChat', function (req, res, next) {
 /* route to get a chat */
 router.post('/getChat', function (req, res, next) {
 	async function getChat() {
-		return await chatSchema.find({ name: req.body.name, password: req.body.password });
+		return await chatSchema.findById(req.body.chatID);
 	}
 
-	getChat().then((item) => res.json(item));
+	getChat().then((item) =>
+		res.json({ users: item.users, name: item.name, messages: item.messages })
+	);
 });
 
 /* route to get a user */
