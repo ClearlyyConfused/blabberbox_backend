@@ -54,7 +54,10 @@ router.post('/createChat', function (req, res, next) {
 /* route to join a chat */
 router.post('/joinChat', function (req, res, next) {
 	async function getChat() {
-		return await chatSchema.findById(req.body.chatID);
+		return await chatSchema.findOne({
+			name: req.body.chatName,
+			password: req.body.chatPassword,
+		});
 	}
 	async function getUser() {
 		return await userSchema.findById(req.body.userID);
@@ -66,7 +69,9 @@ router.post('/joinChat', function (req, res, next) {
 				_id: chat._id,
 				name: chat.name,
 				password: chat.password,
-				users: [...chat.users, req.body.userID],
+				users: chat.users.includes(req.body.userID)
+					? [...chat.users]
+					: [...chat.users, req.body.userID],
 				messages: chat.messages,
 			};
 
@@ -74,7 +79,9 @@ router.post('/joinChat', function (req, res, next) {
 				_id: user._id,
 				username: user.username,
 				password: user.password,
-				chats: [...user.chats, chat._id],
+				chats: user.chats.includes(chat._id)
+					? [...user.chats]
+					: [...user.chats, chat._id],
 			};
 
 			async function updateUser() {
@@ -85,6 +92,7 @@ router.post('/joinChat', function (req, res, next) {
 			}
 			updateChat();
 			updateUser();
+			res.json({ success: true });
 		});
 	});
 });
