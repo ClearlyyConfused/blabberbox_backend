@@ -103,9 +103,7 @@ router.post('/getChat', function (req, res, next) {
 		return await chatSchema.findById(req.body.chatID);
 	}
 
-	getChat().then((item) =>
-		res.json({ users: item.users, name: item.name, messages: item.messages })
-	);
+	getChat().then((item) => res.json(item));
 });
 
 /* route to get a user */
