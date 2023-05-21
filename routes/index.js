@@ -134,7 +134,10 @@ router.post('/messageChat', function (req, res, next) {
 				users: chat.users.includes(user.username)
 					? [...chat.users]
 					: [...chat.users, user.username],
-				messages: [...chat.messages, { user: user.username, message: req.body.message }],
+				messages: [
+					...chat.messages,
+					{ user: user.username, message: req.body.message, timeSent: new Date() },
+				],
 			});
 
 			async function updateChat() {

@@ -10,6 +10,7 @@ var Chats = new Schema({
 			type: {
 				user: { type: String, required: true },
 				message: { type: String, required: true },
+				timeSent: { type: Date, required: true },
 			},
 			required: true,
 		},
