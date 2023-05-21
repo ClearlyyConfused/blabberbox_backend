@@ -4,11 +4,11 @@ var Schema = mongoose.Schema;
 var Chats = new Schema({
 	name: { type: String, required: true },
 	password: { type: String, required: true },
-	users: [{ type: Schema.Types.ObjectId, ref: 'Users', required: true }],
+	users: [{ type: String, required: true }],
 	messages: [
 		{
 			type: {
-				user: { type: Schema.Types.ObjectId, ref: 'Users', required: true },
+				user: { type: String, required: true },
 				message: { type: String, required: true },
 			},
 			required: true,
