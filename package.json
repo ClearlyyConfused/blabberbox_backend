@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"start": "node ./bin/www",
-		"vercel-build": "npm install"
+		"vercel-build": "echo hello"
 	},
 	"dependencies": {
 		"cookie-parser": "~1.4.4",
