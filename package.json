@@ -15,7 +15,8 @@
 		"http-errors": "~1.6.3",
 		"jade": "~1.11.0",
 		"mongoose": "^7.1.1",
-		"morgan": "~1.9.1"
+		"morgan": "~1.9.1",
+		"socket.io": "^4.6.2"
 	},
 	"engines": {
 		"node": ">=14.20.1"

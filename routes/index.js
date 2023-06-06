@@ -5,7 +5,7 @@ var chatSchema = require('../schemas/chat');
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
-	res.render('index', { title: 'Express' });
+	res.send('blabberbox backend');
 });
 
 /* route to create a user */

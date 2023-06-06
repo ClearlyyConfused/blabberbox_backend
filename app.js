@@ -9,7 +9,7 @@ var indexRouter = require('./routes/index');
 
 var app = express();
 
-//Set up mongoose connection
+// set up mongoose connection
 var mongoose = require('mongoose');
 var mongoDB = process.env.DATABASE;
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
