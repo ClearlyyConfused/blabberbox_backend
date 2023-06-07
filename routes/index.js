@@ -1,7 +1,16 @@
+require('dotenv').config();
 var express = require('express');
 var router = express.Router();
 var userSchema = require('../schemas/users');
 var chatSchema = require('../schemas/chat');
+var cloudinary = require('cloudinary').v2;
+
+// Configuration
+cloudinary.config({
+	cloud_name: process.env.CLOUDNAME,
+	api_key: process.env.CLOUDAPI,
+	api_secret: process.env.CLOUDSECRET,
+});
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
@@ -126,25 +135,59 @@ router.post('/messageChat', function (req, res, next) {
 	async function getUser() {
 		return await userSchema.findById(req.body.userID);
 	}
+	async function uploadImage() {
+		return await cloudinary.uploader.upload(req.body.image);
+	}
 
 	getChat().then((chat) => {
 		getUser().then((user) => {
-			const updatedChat = new chatSchema({
-				_id: chat._id,
-				users: chat.users.includes(user.username)
-					? [...chat.users]
-					: [...chat.users, user.username],
-				messages: [
-					...chat.messages,
-					{ user: user.username, message: req.body.message, timeSent: new Date() },
-				],
-			});
+			if (req.body.image !== '') {
+				uploadImage().then((image) => {
+					const updatedChat = new chatSchema({
+						_id: chat._id,
+						users: chat.users.includes(user.username)
+							? [...chat.users]
+							: [...chat.users, user.username],
+						messages: [
+							...chat.messages,
+							{
+								user: user.username,
+								message: req.body.message,
+								timeSent: new Date(),
+								image: image.secure_url,
+							},
+						],
+					});
 
-			async function updateChat() {
-				await chatSchema.findByIdAndUpdate(req.body.chatID, updatedChat).exec();
+					async function updateChat() {
+						await chatSchema.findByIdAndUpdate(req.body.chatID, updatedChat).exec();
+					}
+
+					updateChat();
+				});
+			} else {
+				const updatedChat = new chatSchema({
+					_id: chat._id,
+					users: chat.users.includes(user.username)
+						? [...chat.users]
+						: [...chat.users, user.username],
+					messages: [
+						...chat.messages,
+						{
+							user: user.username,
+							message: req.body.message,
+							timeSent: new Date(),
+							image: '',
+						},
+					],
+				});
+
+				async function updateChat() {
+					await chatSchema.findByIdAndUpdate(req.body.chatID, updatedChat).exec();
+				}
+
+				updateChat();
 			}
-
-			updateChat();
 		});
 	});
 	res.json({ success: true });
