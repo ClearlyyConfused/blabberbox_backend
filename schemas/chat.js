@@ -11,6 +11,7 @@ var Chats = new Schema({
 				user: { type: String, required: true },
 				message: { type: String, required: true },
 				timeSent: { type: Date, required: true },
+				image: { type: String, required: true },
 			},
 			required: true,
 		},
