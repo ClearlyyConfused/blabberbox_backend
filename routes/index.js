@@ -95,32 +95,36 @@ router.post('/joinChat', function (req, res, next) {
 
 	getChat().then((chat) => {
 		getUser().then((user) => {
-			// add the new user to chat's list of users
-			const updatedChat = {
-				_id: chat._id,
-				name: chat.name,
-				password: chat.password,
-				users: chat.users.includes(req.body.userID) ? [...chat.users] : [...chat.users, req.body.userID],
-				messages: chat.messages,
-			};
+			if (chat === null) {
+				res.json({ success: false });
+			} else {
+				// add the new user to chat's list of users
+				const updatedChat = {
+					_id: chat._id,
+					name: chat.name,
+					password: chat.password,
+					users: chat.users.includes(req.body.userID) ? [...chat.users] : [...chat.users, req.body.userID],
+					messages: chat.messages,
+				};
 
-			// add the chat to user's list of chats
-			const updatedUser = {
-				_id: user._id,
-				username: user.username,
-				password: user.password,
-				chats: user.chats.includes(chat._id) ? [...user.chats] : [...user.chats, chat._id],
-			};
+				// add the chat to user's list of chats
+				const updatedUser = {
+					_id: user._id,
+					username: user.username,
+					password: user.password,
+					chats: user.chats.includes(chat._id) ? [...user.chats] : [...user.chats, chat._id],
+				};
 
-			// update both user and chat
-			async function updateUser() {
-				await userSchema.findByIdAndUpdate(req.body.userID, updatedUser).then(res.json({ success: true }));
+				// update both user and chat
+				async function updateUser() {
+					await userSchema.findByIdAndUpdate(req.body.userID, updatedUser).then(res.json({ success: true }));
+				}
+				async function updateChat() {
+					await chatSchema.findByIdAndUpdate(chat._id, updatedChat);
+				}
+				updateChat();
+				updateUser();
 			}
-			async function updateChat() {
-				await chatSchema.findByIdAndUpdate(chat._id, updatedChat);
-			}
-			updateChat();
-			updateUser();
 		});
 	});
 });
@@ -130,6 +134,7 @@ router.post('/getChat', function (req, res, next) {
 	async function getChat() {
 		return await chatSchema.findById(req.body.chatID);
 	}
+
 	getChat().then((item) => res.json(item));
 });
 
@@ -141,7 +146,13 @@ router.post('/getUser', function (req, res, next) {
 			password: req.body.password,
 		});
 	}
-	getUser().then((item) => res.json(item));
+	getUser().then((user) => {
+		if (user.length === 0) {
+			res.json({ success: false });
+		} else {
+			res.json(user);
+		}
+	});
 });
 
 /* route to message a chat */
