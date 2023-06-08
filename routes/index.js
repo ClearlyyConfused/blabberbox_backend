@@ -19,12 +19,23 @@ router.get('/', function (req, res, next) {
 
 /* route to create a user */
 router.post('/createUser', function (req, res, next) {
-	const newUser = new userSchema({
-		username: req.body.username,
-		password: req.body.password,
-		chats: [],
+	// find chat with same name as the inputted name
+	async function getUser() {
+		return await userSchema.find({ username: req.body.username });
+	}
+
+	getUser().then((user) => {
+		if (user.length === 0) {
+			const newUser = new userSchema({
+				username: req.body.username,
+				password: req.body.password,
+				chats: [],
+			});
+			newUser.save().then(res.json({ success: true }));
+		} else {
+			res.json({ success: false });
+		}
 	});
-	newUser.save().then(res.json({ success: true }));
 });
 
 /* route to create a chat */
@@ -36,27 +47,37 @@ router.post('/createChat', function (req, res, next) {
 		messages: [],
 	});
 
+	// find chat with same name as the inputted name
+	async function getChat() {
+		return await chatSchema.find({ name: req.body.name });
+	}
+
 	async function getUser() {
 		return await userSchema.findById(req.body.user);
 	}
 
-	getUser().then((user) => {
-		// add the new chat to the user's list of chats
-		const updatedUser = {
-			_id: user._id,
-			username: user.username,
-			password: user.password,
-			chats: [...user.chats, newChat._id],
-		};
-		async function updateUser() {
-			await userSchema
-				.findByIdAndUpdate(req.body.user, updatedUser)
-				.then(res.json({ success: true }));
-		}
+	getChat().then((chat) => {
+		// if there are no chats with the inputted name
+		if (chat.length === 0) {
+			getUser().then((user) => {
+				// add the new chat to the user's list of chats
+				const updatedUser = {
+					_id: user._id,
+					username: user.username,
+					password: user.password,
+					chats: [...user.chats, newChat._id],
+				};
+				async function updateUser() {
+					await userSchema.findByIdAndUpdate(req.body.user, updatedUser).then(res.json({ success: true }));
+				}
 
-		// save new chat and updated user info with the chat
-		newChat.save();
-		updateUser();
+				// save new chat and updated user info with the chat
+				newChat.save();
+				updateUser();
+			});
+		} else {
+			res.json({ success: false });
+		}
 	});
 });
 
@@ -79,9 +100,7 @@ router.post('/joinChat', function (req, res, next) {
 				_id: chat._id,
 				name: chat.name,
 				password: chat.password,
-				users: chat.users.includes(req.body.userID)
-					? [...chat.users]
-					: [...chat.users, req.body.userID],
+				users: chat.users.includes(req.body.userID) ? [...chat.users] : [...chat.users, req.body.userID],
 				messages: chat.messages,
 			};
 
@@ -90,16 +109,12 @@ router.post('/joinChat', function (req, res, next) {
 				_id: user._id,
 				username: user.username,
 				password: user.password,
-				chats: user.chats.includes(chat._id)
-					? [...user.chats]
-					: [...user.chats, chat._id],
+				chats: user.chats.includes(chat._id) ? [...user.chats] : [...user.chats, chat._id],
 			};
 
 			// update both user and chat
 			async function updateUser() {
-				await userSchema
-					.findByIdAndUpdate(req.body.userID, updatedUser)
-					.then(res.json({ success: true }));
+				await userSchema.findByIdAndUpdate(req.body.userID, updatedUser).then(res.json({ success: true }));
 			}
 			async function updateChat() {
 				await chatSchema.findByIdAndUpdate(chat._id, updatedChat);
@@ -150,9 +165,7 @@ router.post('/messageChat', function (req, res, next) {
 					// update chat with new message
 					const updatedChat = new chatSchema({
 						_id: chat._id,
-						users: chat.users.includes(user.username)
-							? [...chat.users]
-							: [...chat.users, user.username],
+						users: chat.users.includes(user.username) ? [...chat.users] : [...chat.users, user.username],
 						messages: [
 							...chat.messages,
 							{
@@ -176,9 +189,7 @@ router.post('/messageChat', function (req, res, next) {
 				// update chat with new message
 				const updatedChat = new chatSchema({
 					_id: chat._id,
-					users: chat.users.includes(user.username)
-						? [...chat.users]
-						: [...chat.users, user.username],
+					users: chat.users.includes(user.username) ? [...chat.users] : [...chat.users, user.username],
 					messages: [
 						...chat.messages,
 						{
