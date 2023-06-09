@@ -1,4 +1,5 @@
 require('dotenv').config();
+var mongoose = require('mongoose');
 var express = require('express');
 var router = express.Router();
 var userSchema = require('../schemas/users');
@@ -133,6 +134,53 @@ router.post('/joinChat', function (req, res, next) {
 					updateUser();
 				}
 			}
+		});
+	});
+});
+
+router.post('/leaveChat', function (req, res, next) {
+	async function getChat() {
+		return await chatSchema.findById(req.body.chatID);
+	}
+
+	async function getUser() {
+		return await userSchema.findById(req.body.userID);
+	}
+
+	getChat().then((chat) => {
+		getUser().then((user) => {
+			const userIndex = chat.users.indexOf(req.body.userID); // find index of userID in chat's user array
+			const chatIndex = user.chats.indexOf(new mongoose.Types.ObjectId(req.body.chatID)); // find index of chatID in user's chat array
+			// update user and chat arrays
+			if (userIndex !== -1) user.chats.splice(chatIndex, 1);
+			if (chatIndex !== -1) chat.users.splice(userIndex, 1);
+
+			// remove the user from chat's list of users
+			const updatedChat = {
+				_id: chat._id,
+				name: chat.name,
+				password: chat.password,
+				users: chat.users,
+				messages: chat.messages,
+			};
+
+			// remove the chat from user's list of chats
+			const updatedUser = {
+				_id: user._id,
+				username: user.username,
+				password: user.password,
+				chats: user.chats,
+			};
+
+			// update both user and chat
+			async function updateUser() {
+				await userSchema.findByIdAndUpdate(req.body.userID, updatedUser).then(res.json({ success: true }));
+			}
+			async function updateChat() {
+				await chatSchema.findByIdAndUpdate(chat._id, updatedChat);
+			}
+			updateChat();
+			updateUser();
 		});
 	});
 });
