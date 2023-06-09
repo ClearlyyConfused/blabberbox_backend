@@ -232,7 +232,7 @@ router.post('/messageChat', function (req, res, next) {
 					// update chat with new message
 					const updatedChat = new chatSchema({
 						_id: chat._id,
-						users: chat.users.includes(user.username) ? [...chat.users] : [...chat.users, user._id],
+						users: chat.users.includes(user._id) ? [...chat.users] : [...chat.users, user._id],
 						messages: [
 							...chat.messages,
 							{
@@ -256,7 +256,7 @@ router.post('/messageChat', function (req, res, next) {
 				// update chat with new message
 				const updatedChat = new chatSchema({
 					_id: chat._id,
-					users: chat.users.includes(user.username) ? [...chat.users] : [...chat.users, user._id],
+					users: chat.users.includes(user._id) ? [...chat.users] : [...chat.users, user._id],
 					messages: [
 						...chat.messages,
 						{
