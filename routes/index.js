@@ -41,13 +41,6 @@ router.post('/createUser', function (req, res, next) {
 
 /* route to create a chat */
 router.post('/createChat', function (req, res, next) {
-	const newChat = new chatSchema({
-		name: req.body.name,
-		password: req.body.password,
-		users: [req.body.user],
-		messages: [],
-	});
-
 	// find chat with same name as the inputted name
 	async function getChat() {
 		return await chatSchema.find({ name: req.body.name });
@@ -61,6 +54,14 @@ router.post('/createChat', function (req, res, next) {
 		// if there are no chats with the inputted name
 		if (chat.length === 0) {
 			getUser().then((user) => {
+				// create new chat
+				const newChat = new chatSchema({
+					name: req.body.name,
+					password: req.body.password,
+					users: [user.username],
+					messages: [],
+				});
+
 				// add the new chat to the user's list of chats
 				const updatedUser = {
 					_id: user._id,
@@ -109,7 +110,7 @@ router.post('/joinChat', function (req, res, next) {
 						_id: chat._id,
 						name: chat.name,
 						password: chat.password,
-						users: chat.users.includes(req.body.userID) ? [...chat.users] : [...chat.users, req.body.userID],
+						users: chat.users.includes(user.username) ? [...chat.users] : [...chat.users, user.username],
 						messages: chat.messages,
 					};
 
@@ -149,11 +150,11 @@ router.post('/leaveChat', function (req, res, next) {
 
 	getChat().then((chat) => {
 		getUser().then((user) => {
-			const userIndex = chat.users.indexOf(req.body.userID); // find index of userID in chat's user array
+			const userIndex = chat.users.indexOf(user.username); // find index of userID in chat's user array
 			const chatIndex = user.chats.indexOf(new mongoose.Types.ObjectId(req.body.chatID)); // find index of chatID in user's chat array
 			// update user and chat arrays
-			if (userIndex !== -1) user.chats.splice(chatIndex, 1);
-			if (chatIndex !== -1) chat.users.splice(userIndex, 1);
+			if (chatIndex !== -1) user.chats.splice(chatIndex, 1);
+			if (userIndex !== -1) chat.users.splice(userIndex, 1);
 
 			// remove the user from chat's list of users
 			const updatedChat = {
@@ -232,7 +233,7 @@ router.post('/messageChat', function (req, res, next) {
 					// update chat with new message
 					const updatedChat = new chatSchema({
 						_id: chat._id,
-						users: chat.users.includes(user._id) ? [...chat.users] : [...chat.users, user._id],
+						users: chat.users,
 						messages: [
 							...chat.messages,
 							{
@@ -256,7 +257,7 @@ router.post('/messageChat', function (req, res, next) {
 				// update chat with new message
 				const updatedChat = new chatSchema({
 					_id: chat._id,
-					users: chat.users.includes(user._id) ? [...chat.users] : [...chat.users, user._id],
+					users: chat.users,
 					messages: [
 						...chat.messages,
 						{
