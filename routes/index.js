@@ -68,6 +68,7 @@ router.post('/createChat', function (req, res, next) {
 					username: user.username,
 					password: user.password,
 					chats: [...user.chats, newChat._id],
+					image: user.image,
 				};
 				async function updateUser() {
 					await userSchema.findByIdAndUpdate(req.body.user, updatedUser).then(res.json({ success: true }));
@@ -120,6 +121,7 @@ router.post('/joinChat', function (req, res, next) {
 						username: user.username,
 						password: user.password,
 						chats: user.chats.includes(chat._id) ? [...user.chats] : [...user.chats, chat._id],
+						image: user.image,
 					};
 
 					// update both user and chat
@@ -171,6 +173,7 @@ router.post('/leaveChat', function (req, res, next) {
 				username: user.username,
 				password: user.password,
 				chats: user.chats,
+				image: user.image,
 			};
 
 			// update both user and chat
@@ -209,6 +212,33 @@ router.post('/getUser', function (req, res, next) {
 		} else {
 			res.json(user);
 		}
+	});
+});
+
+router.post('/changeProfileImage', function (req, res, next) {
+	async function getUser() {
+		return await userSchema.findById(req.body.userID);
+	}
+	async function uploadImage() {
+		return await cloudinary.uploader.upload(req.body.image);
+	}
+
+	getUser().then((user) => {
+		uploadImage().then((image) => {
+			console.log(image);
+			const updatedUser = {
+				_id: user._id,
+				username: user.username,
+				password: user.password,
+				chats: user.chats,
+				image: image.secure_url,
+			};
+
+			async function updateUser() {
+				await userSchema.findByIdAndUpdate(req.body.userID, updatedUser).then(res.json({ success: true }));
+			}
+			updateUser();
+		});
 	});
 });
 
