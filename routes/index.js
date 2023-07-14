@@ -215,6 +215,7 @@ router.post('/getUser', function (req, res, next) {
 	});
 });
 
+// change profile image for a user
 router.post('/changeProfileImage', function (req, res, next) {
 	async function getUser() {
 		return await userSchema.findById(req.body.userID);
@@ -239,6 +240,17 @@ router.post('/changeProfileImage', function (req, res, next) {
 			}
 			updateUser();
 		});
+	});
+});
+
+// get profile image for a user
+router.post('/getProfileImage', function (req, res, next) {
+	async function getUser() {
+		return await userSchema.find({ username: req.body.username });
+	}
+
+	getUser().then((user) => {
+		res.json({ userProfileImage: user[0].image });
 	});
 });
 
