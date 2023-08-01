@@ -141,6 +141,7 @@ router.post('/joinChat', function (req, res, next) {
 	});
 });
 
+// route to leaveChat
 router.post('/leaveChat', function (req, res, next) {
 	async function getChat() {
 		return await chatSchema.findById(req.body.chatID);
@@ -183,8 +184,15 @@ router.post('/leaveChat', function (req, res, next) {
 			async function updateChat() {
 				await chatSchema.findByIdAndUpdate(chat._id, updatedChat);
 			}
-			updateChat();
+			async function deleteChat() {
+				await chatSchema.findByIdAndDelete(chat._id);
+			}
 			updateUser();
+			if (updatedChat.users.length === 0) {
+				deleteChat();
+			} else {
+				updateChat();
+			}
 		});
 	});
 });
